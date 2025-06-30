@@ -6,26 +6,30 @@ import os
 
 app = FastAPI()
 
-# ✅ Allow requests from React app
+# ✅ Allow requests from frontend (adjust as needed)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # safer
+    allow_origins=["*"],  # you can limit later to your frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.get("/generate-voice/")
+@app.get("/")
+def home():
+    return {"message": "Gnani Voice Server is running ✅"}
+
+@app.get("/generate-voice")
 def generate_voice(text: str):
     filename = "output.mp3"
     
-    # ✅ Clean old file if exists
+    # ✅ Remove old file if exists
     if os.path.exists(filename):
         os.remove(filename)
 
-    # 🎤 Generate new voice
+    # 🎤 Generate voice
     tts = gTTS(text=text, lang='ta')
     tts.save(filename)
 
-    # 📤 Send back to frontend
+    # 📤 Return audio file
     return FileResponse(path=filename, media_type='audio/mpeg', filename=filename)
